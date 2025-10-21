@@ -3,11 +3,13 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Asunto } from 'src/asunto/entities/asunto.entity';
+import { Asunto } from 'src/seeders/asunto/entities/asunto.entity';
+import { User } from 'src/users/entities/user.entity';
 
 export enum EstadoTicket {
   ABIERTO = 'Abierto',
@@ -33,4 +35,6 @@ export class Ticket {
   @OneToOne(() => Asunto)
   @JoinColumn()
   asunto: Asunto;
+  @ManyToOne(() => User, (user) => user.tickets)
+  usuario: User;
 }

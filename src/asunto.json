@@ -1,0 +1,17 @@
+[
+  {
+    "tipo": "Mantenimiento"
+  },
+  {
+    "tipo": "Convivencia"
+  },
+  {
+    "tipo": "Servicios"
+  },
+  {
+    "tipo": "Sugerencia"
+  },
+  {
+    "tipo": "Otro"
+  }
+]

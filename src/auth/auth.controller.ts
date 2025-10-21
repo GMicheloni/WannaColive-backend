@@ -6,13 +6,13 @@ import { CreateUserDto, LoginUserDto } from 'src/users/dto/user.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
   @Post('signup')
-  signup(@Body() body: CreateUserDto) {
-    const { email, password, confirmPassword } = body;
-    return this.authService.signup(email, password, confirmPassword);
+  signup(@Body() credentials: CreateUserDto) {
+    const { email, password } = credentials;
+    return this.authService.signup(email, password);
   }
   @Post('signin')
-  signin(@Body() body: LoginUserDto) {
-    const { email, password } = body;
+  signin(@Body() credentials: LoginUserDto) {
+    const { email, password } = credentials;
     return this.authService.signin(email, password);
   }
 }

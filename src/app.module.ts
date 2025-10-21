@@ -7,7 +7,10 @@ import { UsersModule } from './users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import typeorm from './config/typeorm';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AsuntoModule } from './asunto/asunto.module';
+import { AsuntoModule } from './seeders/asunto/asunto.module';
+import { MotivoModule } from './seeders/motivo/motivo.module';
+import { ComonosconocioModule } from './seeders/comonosconocio/comonosconocio.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -20,7 +23,14 @@ import { AsuntoModule } from './asunto/asunto.module';
       useFactory: (configService: ConfigService) =>
         configService.get('typeorm')!,
     }),
+    JwtModule.register({
+      global: true,
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: '12h' },
+    }),
     AsuntoModule,
+    MotivoModule,
+    ComonosconocioModule,
   ],
   controllers: [AppController],
   providers: [AppService],
