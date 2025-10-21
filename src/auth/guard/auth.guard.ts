@@ -1,15 +1,15 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Roles } from 'src/roles.enum';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(private readonly jwtService: JwtService) {}
   canActivate(context: ExecutionContext): boolean {
-    const request: Request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest();
     const authHeader = request.headers['authorization'];
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return false;
@@ -21,13 +21,7 @@ export class AuthGuard implements CanActivate {
     try {
       const secret = process.env.JWT_SECRET;
       const user = this.jwtService.verify(token, { secret });
-      /* if (user.role == 'admin') {
-        user.role = Roles.ADMIN;
-      } else if (user.role == 'moderator') {
-        user.role = Roles.MODERATOR;
-      } else {
-        user.role = Roles.USER;
-      } */
+      request.user = user;
       console.log(user);
       return true;
     } catch (error) {

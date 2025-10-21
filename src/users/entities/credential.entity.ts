@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from './user.entity';
-import { Roles } from 'src/roles.enum';
+import { Role } from 'src/roles.enum';
 
 @Entity()
 export class Credentials {
@@ -22,8 +22,8 @@ export class Credentials {
   @Column({ type: 'boolean', default: false })
   isActive: boolean;
 
-  @Column({ type: 'enum', enum: Roles, default: Roles.USER })
-  role: Roles;
+  @Column({ type: 'enum', enum: Role, default: Role.USER })
+  role: Role;
 
   @Column({ type: 'boolean', default: false })
   profileCompleted: boolean;
