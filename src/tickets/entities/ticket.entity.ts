@@ -4,7 +4,6 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -31,8 +30,10 @@ export class Ticket {
     default: EstadoTicket.ABIERTO,
   })
   estado: EstadoTicket;
+  @Column('text', { nullable: true })
+  comentarioAdmin: string;
 
-  @OneToOne(() => Asunto)
+  @ManyToOne(() => Asunto)
   @JoinColumn()
   asunto: Asunto;
   @ManyToOne(() => User, (user) => user.tickets)

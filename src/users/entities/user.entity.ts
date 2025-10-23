@@ -5,6 +5,7 @@ import {
   Column,
   OneToMany,
   OneToOne,
+  JoinColumn,
 } from 'typeorm';
 import { Credentials } from './credential.entity';
 @Entity('users')
@@ -46,5 +47,6 @@ export class User {
   tickets: Ticket[];
 
   @OneToOne(() => Credentials, (credentials) => credentials.user)
+  @JoinColumn()
   credentials: Credentials;
 }

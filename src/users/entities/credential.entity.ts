@@ -1,10 +1,4 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from './user.entity';
 import { Role } from 'src/roles.enum';
 
@@ -28,7 +22,6 @@ export class Credentials {
   @Column({ type: 'boolean', default: false })
   profileCompleted: boolean;
 
-  @OneToOne(() => User, (user) => user.credentials)
-  @JoinColumn()
+  @OneToOne(() => User, (user) => user.credentials, { nullable: true })
   user: User;
 }

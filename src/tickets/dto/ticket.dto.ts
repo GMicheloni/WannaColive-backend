@@ -1,7 +1,7 @@
 export class CreateTicketDto {
-  asunto: string;
+  asuntoId: number;
   descripcion: string;
-  userId: number;
+  userId: string;
 }
 
 export class UpdateTicketDto {

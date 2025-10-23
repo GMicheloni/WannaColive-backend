@@ -10,6 +10,7 @@ const config = {
   database: `${process.env.DB_NAME}`,
   entities: ['dist/**/*.entity{.ts,.js}'],
   migrations: ['dist/migrations/*{.ts,.js}'],
+  dropschema: true,
   autoLoadEntities: true,
   synchronize: true,
 };

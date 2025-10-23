@@ -8,4 +8,9 @@ export class AsuntoController {
   seeder() {
     return this.asuntoService.seeder();
   }
+
+  @Get()
+  findAll() {
+    return this.asuntoService.findAll();
+  }
 }
