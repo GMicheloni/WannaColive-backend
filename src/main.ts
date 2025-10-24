@@ -4,10 +4,16 @@ import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
   app.enableCors({
-    origin: 'http://localhost:3000', // tu frontend
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true, // si usas cookies o headers de autorización
+    origin: [
+      'http://localhost:3000',
+      'https://localhost:3000',
+      'https://wanna-colive-frontend.vercel.app', // (si lo tenés publicado)
+    ],
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
   });
 
   app.useGlobalPipes(new ValidationPipe());
