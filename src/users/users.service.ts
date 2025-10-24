@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository, DeepPartial } from 'typeorm';
 import { Credentials } from './entities/credential.entity';
+import { Role } from 'src/roles.enum';
 
 @Injectable()
 export class UsersService {
@@ -41,5 +42,12 @@ export class UsersService {
 
     await this.userRepository.save(user);
     return 'User created successfully';
+  }
+  async makeAdmin(id: string) {
+    console.log(`usuario ascendido ${id}`);
+    return await this.credentialsRepository.update(
+      { id: id },
+      { role: Role.ADMIN },
+    );
   }
 }

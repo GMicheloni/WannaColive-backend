@@ -1,16 +1,17 @@
 import { registerAs } from '@nestjs/config';
 import * as dotenv from 'dotenv';
-dotenv.config();
+dotenv.config({ path: '.env.development' });
 
 const config = {
   type: 'postgres',
-  url:
-    process.env.DATABASE_URL ||
-    'postgres://postgres:password@localhost:5432/mi_db', // URL completa
+  url: process.env.DB_URL,
   entities: ['dist/**/*.entity{.ts,.js}'],
   migrations: ['dist/migrations/*{.ts,.js}'],
-  synchronize: true, // solo para demo
-  dropSchema: true, // opcional: resetea la DB en cada deploy
+  autoLoadEntities: true,
+  synchronize: true, // ⚠️ solo en desarrollo
+  ssl: {
+    rejectUnauthorized: false, // importante para Render
+  },
 };
 
 export default registerAs('typeorm', () => config);
