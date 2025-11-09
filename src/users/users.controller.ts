@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { Body, Controller, Patch, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Req, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/user.dto';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
@@ -15,6 +15,20 @@ export class UsersController {
   @UseGuards(AuthGuard, RolesGuard)
   createUser(@Body() body: CreateUserDto, @Req() req) {
     return this.usersService.createUser(body, req.user.id);
+  }
+
+  @Get('inactives')
+  @Roles(Role.ADMIN, Role.MODERATOR)
+  @UseGuards(AuthGuard)
+  getUsersWithoutActive() {
+    return this.usersService.getUsersWithoutActive();
+  }
+  @Patch('/active')
+  @Roles(Role.ADMIN, Role.MODERATOR)
+  @UseGuards(AuthGuard, RolesGuard)
+  darDeAlta(@Body() body) {
+    const { email } = body;
+    return this.usersService.darDeAlta(email);
   }
 
   /*  @Put(':id/admin')

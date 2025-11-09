@@ -8,6 +8,7 @@ import { Pais } from 'src/countries/entities/pais.entity';
 import { Motivo } from 'src/seeders/motivo/entities/motivo.entity';
 import { Comonosconocio } from 'src/seeders/comonosconocio/entities/comonosconocio.entity';
 import { JwtService } from '@nestjs/jwt';
+import { Role } from 'src/roles.enum';
 
 @Injectable()
 export class UsersService {
@@ -50,11 +51,32 @@ export class UsersService {
     await this.userRepository.save(user);
     return { message: 'User updated successfully', newToken: token };
   }
-  /* async makeAdmin(id: string) {
+  async getUsersWithoutActive() {
+    const users = await this.userRepository.find({
+      where: { isActive: false, role: Role.USER },
+      select: ['email', 'nameandsurname', 'dni', 'phone'],
+    });
+
+    return users;
+  }
+  async darDeAlta(email: any) {
+    const user = await this.userRepository.findOne({ where: { email } });
+    if (!user) throw new NotFoundException('User not found');
+
+    if (user.isActive) {
+      return { message: 'User already active' };
+    }
+
+    user.isActive = true;
+    await this.userRepository.save(user);
+
+    return { message: 'User activated successfully' };
+  }
+}
+/* async makeAdmin(id: string) {
     console.log(`usuario ascendido ${id}`);
     return await this.credentialsRepository.update(
       { id: id },
       { role: Role.ADMIN },
     );
   } */
-}
