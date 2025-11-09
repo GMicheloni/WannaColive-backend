@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { CreateUserDto } from './dto/user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
@@ -9,17 +9,44 @@ import { Motivo } from 'src/seeders/motivo/entities/motivo.entity';
 import { Comonosconocio } from 'src/seeders/comonosconocio/entities/comonosconocio.entity';
 import { JwtService } from '@nestjs/jwt';
 import { Role } from 'src/roles.enum';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
-export class UsersService {
+export class UsersService implements OnModuleInit {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
   ) {}
+
+  // 👇 Esto se ejecuta automáticamente al iniciar la app
+  async onModuleInit() {
+    const admins = [
+      { email: 'juan@admin.com', password: '1234Admin' },
+      { email: 'lali@admin.com', password: '1234Admin' },
+      { email: 'fede@admin.com', password: '1234Admin' },
+      { email: 'gian@admin.com', password: '1234Admin' },
+    ];
+
+    for (const admin of admins) {
+      const hashedPassword = await bcrypt.hash(admin.password, 10);
+      const newAdmin = this.userRepository.create({
+        email: admin.email,
+        password: hashedPassword,
+        nameandsurname: 'Administrador',
+        role: Role.ADMIN,
+        isActive: true,
+        profileCompleted: true,
+      });
+      await this.userRepository.save(newAdmin);
+    }
+
+    console.log('✅ Usuario administrador creado automáticamente');
+  }
+
   async createUser(body: CreateUserDto, userId: string) {
     const user = await this.userRepository.preload({
-      id: userId, // 🔹 Este campo le dice a TypeORM qué usuario actualizar
+      id: userId,
       nameandsurname: body.nameandsurname,
       dni: body.dni,
       phone: body.phone,
@@ -37,6 +64,7 @@ export class UsersService {
       hobbies: (body.intereses ?? []).map((id: number) => ({ id })),
       profileCompleted: true,
     });
+
     const token = this.jwtService.sign({
       id: user!.id,
       role: user!.role,
@@ -51,6 +79,7 @@ export class UsersService {
     await this.userRepository.save(user);
     return { message: 'User updated successfully', newToken: token };
   }
+
   async getUsersWithoutActive() {
     const users = await this.userRepository.find({
       where: { isActive: false, role: Role.USER },
@@ -59,6 +88,7 @@ export class UsersService {
 
     return users;
   }
+
   async darDeAlta(email: any) {
     const user = await this.userRepository.findOne({ where: { email } });
     if (!user) throw new NotFoundException('User not found');
@@ -73,10 +103,3 @@ export class UsersService {
     return { message: 'User activated successfully' };
   }
 }
-/* async makeAdmin(id: string) {
-    console.log(`usuario ascendido ${id}`);
-    return await this.credentialsRepository.update(
-      { id: id },
-      { role: Role.ADMIN },
-    );
-  } */
