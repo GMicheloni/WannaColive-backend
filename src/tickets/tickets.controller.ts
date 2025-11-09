@@ -29,9 +29,9 @@ export class TicketsController {
   @Roles(Role.USER)
   @UseGuards(AuthGuard, RolesGuard)
   create(@Body() createTicketDto: CreateTicketDto, @Req() req) {
-    const credentialId = req.user.id;
+    const userId = req.user.id;
     const { asuntoId, descripcion } = createTicketDto;
-    return this.ticketsService.create(asuntoId, descripcion, credentialId);
+    return this.ticketsService.create(asuntoId, descripcion, userId);
   }
 
   @Get()
@@ -39,9 +39,8 @@ export class TicketsController {
   @UseGuards(AuthGuard, RolesGuard)
   @Get()
   async getMyTickets(@Req() req) {
-    const credentialId = req.user.id; // userId extraído del JWT (usualmente con JwtAuthGuard)
-    console.log('User ID from JWT:', credentialId);
-    return await this.ticketsService.getByUserId(credentialId);
+    const userId = req.user.id;
+    return await this.ticketsService.getByUserId(userId);
   }
 
   @Put('/:id/close')

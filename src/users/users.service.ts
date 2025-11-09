@@ -1,53 +1,60 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository, DeepPartial } from 'typeorm';
-import { Credentials } from './entities/credential.entity';
-import { Role } from 'src/roles.enum';
+import { Ciudad } from 'src/cities/entities/ciudad.entity';
+import { Pais } from 'src/countries/entities/pais.entity';
+import { Motivo } from 'src/seeders/motivo/entities/motivo.entity';
+import { Comonosconocio } from 'src/seeders/comonosconocio/entities/comonosconocio.entity';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UsersService {
-  @InjectRepository(User)
-  private readonly userRepository: Repository<User>;
-  @InjectRepository(Credentials)
-  private readonly credentialsRepository: Repository<Credentials>;
-
-  constructor() {}
-  async createUser(body: CreateUserDto) {
-    const credentialId = body.credencialId;
-    const credential = await this.credentialsRepository.findOne({
-      where: { id: credentialId },
-    });
-    if (!credential) {
-      throw new Error('Credential not found');
-    }
-    const user = this.userRepository.create({
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    private readonly jwtService: JwtService,
+  ) {}
+  async createUser(body: CreateUserDto, userId: string) {
+    const user = await this.userRepository.preload({
+      id: userId, // 🔹 Este campo le dice a TypeORM qué usuario actualizar
       nameandsurname: body.nameandsurname,
       dni: body.dni,
       phone: body.phone,
-      pais: body.pais,
-      ciudad: body.ciudad,
+      pais: { id: body.pais } as DeepPartial<Pais>,
+      ciudad: { id: body.ciudad } as DeepPartial<Ciudad>,
       dateofbirth: body.dateofbirth,
-      motivoid: body.motivoid,
-      asuntoid: body.asuntoid,
+      motivo: { id: body.motivoid } as DeepPartial<Motivo>,
       institucion: body.institucion,
-      comonosconocioid: body.comonosconocioid,
-      credentials: credential, // aquí sí funciona
-      instagramuser: body.instagramuser || null,
-      intereses: body.intereses || null,
-      areadeestudio: body.areadeestudio || null,
-      aboutme: body.aboutme || null,
-    } as DeepPartial<User>);
+      comonosconocio: {
+        id: body.comonosconocioid,
+      } as DeepPartial<Comonosconocio>,
+      instagramuser: body.instagramuser || undefined,
+      areadeestudio: body.areadeestudio || undefined,
+      aboutme: body.aboutme || undefined,
+      hobbies: (body.intereses ?? []).map((id: number) => ({ id })),
+      profileCompleted: true,
+    });
+    const token = this.jwtService.sign({
+      id: user!.id,
+      role: user!.role,
+      isActive: user!.isActive,
+      profileCompleted: user!.profileCompleted,
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
     await this.userRepository.save(user);
-    return 'User created successfully';
+    return { message: 'User updated successfully', newToken: token };
   }
-  async makeAdmin(id: string) {
+  /* async makeAdmin(id: string) {
     console.log(`usuario ascendido ${id}`);
     return await this.credentialsRepository.update(
       { id: id },
       { role: Role.ADMIN },
     );
-  }
+  } */
 }

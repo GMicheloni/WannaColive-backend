@@ -8,4 +8,9 @@ export class ComonosconocioController {
   seeder() {
     return this.comonosconocioService.onModuleInit();
   }
+
+  @Get('all')
+  findAll() {
+    return this.comonosconocioService.findAll();
+  }
 }

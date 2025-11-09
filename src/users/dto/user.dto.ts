@@ -72,15 +72,15 @@ export class CreateUserDto {
   @Length(1, 15)
   phone: string;
 
-  @IsString()
+  @IsInt()
+  @Type(() => Number)
   @IsNotEmpty()
-  @MaxLength(30)
-  pais: string;
+  pais: number;
 
-  @IsString()
+  @IsInt()
+  @Type(() => Number)
   @IsNotEmpty()
-  @MaxLength(30)
-  ciudad: string;
+  ciudad: number;
 
   @IsDateString()
   @IsNotEmpty()
@@ -90,11 +90,6 @@ export class CreateUserDto {
   @Type(() => Number)
   @IsNotEmpty()
   motivoid: number;
-
-  @IsInt()
-  @Type(() => Number)
-  @IsNotEmpty()
-  asuntoid: number;
 
   @IsString()
   @IsNotEmpty()
@@ -106,10 +101,6 @@ export class CreateUserDto {
   @IsNotEmpty()
   comonosconocioid: number;
 
-  @IsString()
-  @IsNotEmpty()
-  credencialId: string;
-
   @IsOptional()
   @IsString()
   @MaxLength(30)
@@ -119,8 +110,9 @@ export class CreateUserDto {
   @IsArray()
   @ArrayNotEmpty()
   @ArrayUnique()
-  @IsString({ each: true })
-  intereses?: string[];
+  @IsInt({ each: true })
+  @Type(() => Number)
+  intereses?: number[];
 
   @IsOptional()
   @IsString()

@@ -2,13 +2,14 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import { Credentials } from 'src/users/entities/credential.entity';
+
+import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(Credentials)
-    private userRepository: Repository<Credentials>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
     private readonly jwtService: JwtService,
   ) {}
   async signup(email: string, password: string) {
@@ -22,7 +23,7 @@ export class AuthService {
       password: hashedPassword,
     });
     await this.userRepository.save(newUser);
-    return 'User created successfully';
+    return { message: 'User created successfully' };
   }
   async signin(email: string, password: string) {
     const user = await this.userRepository.findOne({ where: { email } });
@@ -36,7 +37,6 @@ export class AuthService {
 
     const token = this.jwtService.sign({
       id: user.id,
-      email: user.email,
       role: user.role,
       isActive: user.isActive,
       profileCompleted: user.profileCompleted,

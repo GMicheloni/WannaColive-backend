@@ -1,0 +1,10 @@
+[
+  { "nombre": "Deportes" },
+  { "nombre": "Musica" },
+  { "nombre": "Cine" },
+  { "nombre": "Lectura" },
+  { "nombre": "Viajes" },
+  { "nombre": "Tecnologia" },
+  { "nombre": "Arte" },
+  { "nombre": "Cocina" }
+]

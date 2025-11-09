@@ -8,8 +8,9 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'http://localhost:3000',
+      'http://localhost:3002',
       'https://localhost:3000',
-      'https://wanna-colive-frontend.vercel.app', // (si lo tenés publicado)
+      'https://wanna-colive-frontend.vercel.app',
     ],
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],

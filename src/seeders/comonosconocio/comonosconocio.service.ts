@@ -4,7 +4,7 @@
 import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import * as comonosData from '../../users/comonosconocio.json';
+import * as comonosData from '../../comonosconocio.json';
 import { Comonosconocio } from './entities/comonosconocio.entity';
 // ...existing code...
 
@@ -47,6 +47,9 @@ export class ComonosconocioService implements OnModuleInit {
 
     this.logger.log(`Comonosconocio seeder: ${inserted} registros insertados`);
     return { inserted };
+  }
+  findAll() {
+    return this.comonosRepository.find();
   }
 }
 // ...existing code...

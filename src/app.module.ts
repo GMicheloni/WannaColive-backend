@@ -11,6 +11,9 @@ import { AsuntoModule } from './seeders/asunto/asunto.module';
 import { MotivoModule } from './seeders/motivo/motivo.module';
 import { ComonosconocioModule } from './seeders/comonosconocio/comonosconocio.module';
 import { JwtModule } from '@nestjs/jwt';
+import { CountriesModule } from './countries/countries.module';
+import { CitiesModule } from './cities/cities.module';
+import { HobbiesModule } from './hobbies/hobbies.module';
 
 @Module({
   imports: [
@@ -31,6 +34,9 @@ import { JwtModule } from '@nestjs/jwt';
     AsuntoModule,
     MotivoModule,
     ComonosconocioModule,
+    CountriesModule,
+    CitiesModule,
+    HobbiesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -4,49 +4,77 @@ import {
   PrimaryGeneratedColumn,
   Column,
   OneToMany,
-  OneToOne,
+  ManyToMany,
+  JoinTable,
+  ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Credentials } from './credential.entity';
+import { Role } from 'src/roles.enum';
+import { Hobby } from 'src/hobbies/entities/hobby.entity';
+import { Ciudad } from 'src/cities/entities/ciudad.entity';
+import { Pais } from 'src/countries/entities/pais.entity';
+import { Comonosconocio } from 'src/seeders/comonosconocio/entities/comonosconocio.entity';
+import { Motivo } from 'src/seeders/motivo/entities/motivo.entity';
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column({ type: 'varchar', length: 50, nullable: false, unique: true })
+  email: string;
+
   @Column({ type: 'varchar', length: 100, nullable: false })
+  password: string;
+
+  @Column({ type: 'boolean', default: false })
+  isActive: boolean;
+
+  @Column({ type: 'enum', enum: Role, default: Role.USER })
+  role: Role;
+
+  @Column({ type: 'boolean', default: false })
+  profileCompleted: boolean;
+  @Column({ type: 'varchar', length: 100, nullable: true })
   nameandsurname: string;
 
-  @Column({ type: 'varchar', length: 30, nullable: false, unique: true })
+  @Column({ type: 'varchar', length: 30, nullable: true, unique: true })
   dni: string;
-  @Column({ type: 'varchar', length: 15, nullable: false })
+  @Column({ type: 'varchar', length: 15, nullable: true })
   phone: string;
-  @Column({ type: 'varchar', length: 30, nullable: false })
-  pais: string;
-  @Column({ type: 'varchar', length: 30, nullable: false })
-  ciudad: string;
-  @Column({ type: 'date', nullable: false })
+
+  @Column({ type: 'date', nullable: true })
   dateofbirth: Date;
-  @Column({ type: 'int', nullable: false })
-  motivoid: number;
-  @Column({ type: 'int', nullable: false })
-  asuntoid: number;
-  @Column({ type: 'varchar', length: 100, nullable: false })
+  // reemplazado: motivoid:number;
+  @ManyToOne(() => Motivo, (motivo) => motivo.usuarios, { nullable: true })
+  @JoinColumn({ name: 'motivoid' })
+  motivo: Motivo;
+
+  @Column({ type: 'varchar', length: 100, nullable: true })
   institucion: string;
-  @Column({ type: 'int', nullable: false })
-  comonosconocioid: number;
+  @ManyToOne(() => Comonosconocio, (comonos) => comonos.usuarios, {
+    nullable: true,
+  })
+  @JoinColumn({ name: 'comonosconocioid' })
+  comonosconocio: Comonosconocio;
+
   @Column({ type: 'varchar', length: 30, nullable: true, default: null })
-  instagramuser: string;
-  @Column({ type: 'simple-array', nullable: true, default: null })
-  intereses: string[];
+  instagramuser: string | null;
+
   @Column({ type: 'varchar', length: 30, nullable: true, default: null })
-  areadeestudio: string;
+  areadeestudio: string | null;
   @Column({ type: 'text', nullable: true, default: null })
-  aboutme: string;
+  aboutme: string | null;
 
   @OneToMany(() => Ticket, (ticket) => ticket.usuario)
   tickets: Ticket[];
 
-  @OneToOne(() => Credentials, (credentials) => credentials.user)
-  @JoinColumn()
-  credentials: Credentials;
+  @ManyToMany(() => Hobby)
+  @JoinTable()
+  hobbies: Hobby[];
+
+  @ManyToOne(() => Pais, (pais) => pais.id)
+  pais: Pais;
+
+  @ManyToOne(() => Ciudad, (ciudad) => ciudad.id)
+  ciudad: Ciudad;
 }

@@ -9,4 +9,9 @@ export class MotivoController {
   seederMotivos() {
     return this.motivoService.seederMotivos();
   }
+
+  @Get('all')
+  findAll() {
+    return this.motivoService.findAll();
+  }
 }

@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { EstadoTicket, Ticket } from './entities/ticket.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
+import { Asunto } from 'src/seeders/asunto/entities/asunto.entity';
 
 @Injectable()
 export class TicketsService {
@@ -12,6 +13,8 @@ export class TicketsService {
 
   @InjectRepository(User)
   private userRepository: Repository<User>;
+  @InjectRepository(Asunto)
+  private asuntoRepository: Repository<Asunto>;
 
   constructor() {}
   async findAll() {
@@ -28,44 +31,48 @@ export class TicketsService {
       asunto: { tipo: t.asunto.tipo }, // solo tipo
     }));
   }
-  async create(asuntoId: number, descripcion: string, credentialId: string) {
-    const usuario = await this.userRepository.findOne({
-      where: {
-        credentials: { id: credentialId },
-      },
-      relations: ['credentials'],
+  async create(asuntoId: number, descripcion: string, userId) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+
+    // validar asunto
+    const asunto = await this.asuntoRepository.findOne({
+      where: { id: asuntoId },
     });
-    if (!usuario) throw new Error('Usuario no encontrado');
+    if (!asunto) throw new NotFoundException('Asunto no encontrado');
+
     const newTicket = this.ticketRepository.create({
       descripcion,
-      usuario: { id: usuario.id },
-      asunto: { id: asuntoId },
+      asunto,
+      usuario: user,
     });
 
     return this.ticketRepository.save(newTicket);
   }
-  async getByUserId(credentialId: any) {
-    const usuario = await this.userRepository
-      .createQueryBuilder('user')
-      .innerJoinAndSelect('user.credentials', 'credentials')
-      .leftJoinAndSelect('user.tickets', 'ticket')
+  async getByUserId(userId: any) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+
+    const tickets = await this.ticketRepository
+      .createQueryBuilder('ticket')
       .leftJoinAndSelect('ticket.asunto', 'asunto')
-      .where('credentials.id = :credentialId', { credentialId })
-      .getOne();
+      .where('ticket.usuarioId = :userId OR ticket.usuarioId = :userId', {
+        userId,
+      })
+      // si la columna FK en la BD se llama diferente, TypeORM mapea JoinColumn name; alternativa:
+      // .where('ticket.usuarioId = :userId', { userId })
+      .orderBy('ticket.creadoEn', 'DESC')
+      .getMany();
 
-    if (!usuario) throw new Error('Usuario no encontrado');
-
-    // Transformar los tickets
-    const tickets = usuario.tickets.map((t) => ({
+    return tickets.map((t) => ({
+      id: t.id,
       descripcion: t.descripcion,
       creadoEn: t.creadoEn,
       actualizadoEn: t.actualizadoEn,
       estado: t.estado,
-      asunto: { tipo: t.asunto.tipo },
+      asunto: t.asunto ? { id: t.asunto.id, tipo: t.asunto.tipo } : null,
       comentarioAdmin: t.comentarioAdmin,
     }));
-
-    return tickets;
   }
   closeTicket(id: string, comentarioAdmin: string) {
     return this.ticketRepository.update(id, {

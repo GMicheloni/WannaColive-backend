@@ -47,5 +47,9 @@ export class MotivoService implements OnModuleInit {
     this.logger.log(`Motivo seeder: ${inserted} registros insertados`);
     return { inserted };
   }
+
+  findAll() {
+    return this.motivoRepository.find();
+  }
 }
 // ...existing code...s
