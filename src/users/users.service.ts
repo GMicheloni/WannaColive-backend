@@ -29,19 +29,29 @@ export class UsersService implements OnModuleInit {
     ];
 
     for (const admin of admins) {
-      const hashedPassword = await bcrypt.hash(admin.password, 10);
-      const newAdmin = this.userRepository.create({
-        email: admin.email,
-        password: hashedPassword,
-        nameandsurname: 'Administrador',
-        role: Role.ADMIN,
-        isActive: true,
-        profileCompleted: true,
+      const existingAdmin = await this.userRepository.findOne({
+        where: { email: admin.email },
       });
-      await this.userRepository.save(newAdmin);
+
+      if (!existingAdmin) {
+        const hashedPassword = await bcrypt.hash(admin.password, 10);
+        const newAdmin = this.userRepository.create({
+          email: admin.email,
+          password: hashedPassword,
+          nameandsurname: 'Administrador',
+          role: Role.ADMIN,
+          isActive: true,
+          profileCompleted: true,
+        });
+
+        await this.userRepository.save(newAdmin);
+        console.log(`✅ Admin creado: ${admin.email}`);
+      } else {
+        console.log(`⚠️ Admin ya existe: ${admin.email}`);
+      }
     }
 
-    console.log('✅ Usuario administrador creado automáticamente');
+    console.log('✔️ Seed de administradores completado');
   }
 
   async createUser(body: CreateUserDto, userId: string) {
