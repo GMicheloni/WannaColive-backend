@@ -28,7 +28,10 @@ export class TicketsService {
       creadoEn: t.creadoEn,
       actualizadoEn: t.actualizadoEn,
       estado: t.estado,
-      asunto: { tipo: t.asunto.tipo }, // solo tipo
+      asunto: { tipo: t.asunto.tipo },
+      nameAndSurname: t.usuario?.nameandsurname,
+      emailUser: t.usuario?.email,
+      comentAdmin: t.comentarioAdmin,
     }));
   }
   async create(asuntoId: number, descripcion: string, userId) {

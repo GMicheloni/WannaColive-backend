@@ -1,13 +1,6 @@
-import {
-  Body,
-  Controller,
-  Param,
-  Patch,
-  Post,
-  Put,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+import { Body, Controller, Patch, Req, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/user.dto';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
@@ -24,8 +17,8 @@ export class UsersController {
     return this.usersService.createUser(body, req.user.id);
   }
 
-  @Put(':id/admin')
+  /*  @Put(':id/admin')
   makeAdmin(@Param('id') id: string) {
-    /* return this.usersService.makeAdmin(id); */
-  }
+    return this.usersService.makeAdmin(id);
+  } */
 }
