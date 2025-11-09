@@ -21,9 +21,9 @@ const config = {
   synchronize: true,
   dropschema: true,
   // ⚠️ solo en desarrollo
-  /* ssl: {
+  ssl: {
     rejectUnauthorized: false, // importante para Render
-  }, */
+  },
 };
 
 export default registerAs('typeorm', () => config);
