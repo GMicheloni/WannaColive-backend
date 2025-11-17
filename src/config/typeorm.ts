@@ -19,7 +19,7 @@ const config = {
   migrations: ['dist/migrations/*{.ts,.js}'],
   autoLoadEntities: true,
   synchronize: true,
-  dropSchema: false,
+  dropSchema: true,
   // ⚠️ solo en desarrollo - elimina y recrea el esquema cada vez que se inicia la app
   ssl: {
     rejectUnauthorized: false, // importante para Render
