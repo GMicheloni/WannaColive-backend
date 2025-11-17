@@ -21,9 +21,9 @@ const config = {
   synchronize: true,
   dropSchema: false,
   // ⚠️ solo en desarrollo - elimina y recrea el esquema cada vez que se inicia la app
-  /* ssl: {
+  ssl: {
     rejectUnauthorized: false, // importante para Render
-  }, */
+  },
 };
 
 export default registerAs('typeorm', () => config);
