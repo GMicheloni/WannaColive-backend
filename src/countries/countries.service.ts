@@ -19,7 +19,13 @@ export class CountriesService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    await this.seedPaisesYciudades();
+    try {
+      await this.seedPaisesYciudades();
+    } catch (error) {
+      this.logger.error(
+        `Error en onModuleInit de CountriesService: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
   }
 
   async seedPaisesYciudades() {
@@ -73,7 +79,14 @@ export class CountriesService implements OnModuleInit {
 
     return { insertedPaises, insertedCiudades };
   }
-  getAllCountries() {
-    return this.paisRepository.find();
+  async getAllCountries() {
+    try {
+      return await this.paisRepository.find();
+    } catch (error) {
+      this.logger.error(
+        `Error en getAllCountries: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      throw new Error('Error al obtener países');
+    }
   }
 }

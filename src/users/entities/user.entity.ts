@@ -4,6 +4,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   OneToMany,
+  OneToOne,
   ManyToMany,
   JoinTable,
   ManyToOne,
@@ -15,6 +16,9 @@ import { Ciudad } from 'src/cities/entities/ciudad.entity';
 import { Pais } from 'src/countries/entities/pais.entity';
 import { Comonosconocio } from 'src/seeders/comonosconocio/entities/comonosconocio.entity';
 import { Motivo } from 'src/seeders/motivo/entities/motivo.entity';
+import { TipoDocumento } from 'src/seeders/tipodocumento/entities/tipodocumento.entity';
+import { Casa } from 'src/seeders/casa/entities/casa.entity';
+import { Contrato } from 'src/contratos/entities/contrato.entity';
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
@@ -34,11 +38,21 @@ export class User {
 
   @Column({ type: 'boolean', default: false })
   profileCompleted: boolean;
-  @Column({ type: 'varchar', length: 100, nullable: true })
-  nameandsurname: string;
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  nombre: string;
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  apellido: string;
 
   @Column({ type: 'varchar', length: 30, nullable: true, unique: true })
   dni: string;
+
+  @ManyToOne(() => TipoDocumento, (tipoDocumento) => tipoDocumento.usuarios, {
+    nullable: true,
+  })
+  @JoinColumn({ name: 'tipodocumentoid' })
+  tipoDocumento: TipoDocumento;
+
   @Column({ type: 'varchar', length: 15, nullable: true })
   phone: string;
 
@@ -68,6 +82,9 @@ export class User {
   @OneToMany(() => Ticket, (ticket) => ticket.usuario)
   tickets: Ticket[];
 
+  @OneToOne(() => Contrato, (contrato) => contrato.usuario)
+  contrato: Contrato;
+
   @ManyToMany(() => Hobby)
   @JoinTable()
   hobbies: Hobby[];
@@ -77,4 +94,8 @@ export class User {
 
   @ManyToOne(() => Ciudad, (ciudad) => ciudad.id)
   ciudad: Ciudad;
+
+  @ManyToOne(() => Casa, (casa) => casa.usuarios, { nullable: true })
+  @JoinColumn({ name: 'casaid' })
+  casa: Casa;
 }

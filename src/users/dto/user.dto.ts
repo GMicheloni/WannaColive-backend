@@ -57,10 +57,20 @@ export class LoginUserDto {
 }
 
 export class CreateUserDto {
+  @IsInt()
+  @Type(() => Number)
+  @IsNotEmpty()
+  tipoDocumento: number;
+
   @IsString()
   @IsNotEmpty()
-  @MaxLength(100)
-  nameandsurname: string;
+  @MaxLength(50)
+  nombre: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(50)
+  apellido: string;
 
   @IsString()
   @IsNotEmpty()
@@ -122,4 +132,32 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   aboutme?: string;
+}
+
+export class CreateAdminDto {
+  @IsEmail({}, { message: 'El email no tiene un formato válido' })
+  @IsNotEmpty({ message: 'El email es obligatorio' })
+  email: string;
+
+  @IsString({ message: 'La contraseña debe ser una cadena de texto' })
+  @IsNotEmpty({ message: 'La contraseña es obligatoria' })
+  @MinLength(8, { message: 'La contraseña debe tener al menos 8 caracteres' })
+  @MaxLength(32, {
+    message: 'La contraseña no puede tener más de 32 caracteres',
+  })
+  @Matches(/(?=.*[A-Z])/, {
+    message: 'La contraseña debe tener al menos una letra mayúscula',
+  })
+  @Matches(/(?=.*[a-z])/, {
+    message: 'La contraseña debe tener al menos una letra minúscula',
+  })
+  @Matches(/(?=.*\d)/, {
+    message: 'La contraseña debe tener al menos un número',
+  })
+  password: string;
+
+  @IsInt()
+  @Type(() => Number)
+  @IsNotEmpty({ message: 'La casa es obligatoria' })
+  casa: number;
 }

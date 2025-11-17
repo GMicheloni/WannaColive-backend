@@ -16,7 +16,13 @@ export class HobbiesService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    await this.seederHobbies();
+    try {
+      await this.seederHobbies();
+    } catch (error) {
+      this.logger.error(
+        `Error en onModuleInit de HobbiesService: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
   }
 
   async seederHobbies() {
@@ -51,12 +57,29 @@ export class HobbiesService implements OnModuleInit {
     return 'This action adds a new hobby';
   }
 
-  findAll() {
-    return this.hobbyRepository.find();
+  async findAll() {
+    try {
+      return await this.hobbyRepository.find();
+    } catch (error) {
+      this.logger.error(
+        `Error en findAll: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      throw new Error('Error al obtener hobbies');
+    }
   }
 
-  findOne(id: number) {
-    return this.hobbyRepository.findOne({ where: { id } });
+  async findOne(id: number) {
+    try {
+      if (!id || typeof id !== 'number') {
+        throw new Error('Invalid hobby ID');
+      }
+      return await this.hobbyRepository.findOne({ where: { id } });
+    } catch (error) {
+      this.logger.error(
+        `Error en findOne: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      throw new Error('Error al obtener hobby');
+    }
   }
 
   update(id: number, updateHobbyDto: UpdateHobbyDto) {

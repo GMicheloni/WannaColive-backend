@@ -1,4 +1,10 @@
-import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  OnModuleInit,
+  Logger,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
@@ -10,106 +16,273 @@ import { Comonosconocio } from 'src/seeders/comonosconocio/entities/comonosconoc
 import { JwtService } from '@nestjs/jwt';
 import { Role } from 'src/roles.enum';
 import * as bcrypt from 'bcrypt';
+import { TipoDocumento } from 'src/seeders/tipodocumento/entities/tipodocumento.entity';
+import { Casa } from 'src/seeders/casa/entities/casa.entity';
 
 @Injectable()
 export class UsersService implements OnModuleInit {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Casa)
+    private readonly casaRepository: Repository<Casa>,
     private readonly jwtService: JwtService,
   ) {}
 
   // 👇 Esto se ejecuta automáticamente al iniciar la app
   async onModuleInit() {
-    const admins = [
-      { email: 'juan@admin.com', password: '1234Admin' },
-      { email: 'lali@admin.com', password: '1234Admin' },
-      { email: 'fede@admin.com', password: '1234Admin' },
-      { email: 'gian@admin.com', password: '1234Admin' },
-    ];
+    try {
+      const admins = [
+        { email: 'juan@admin.com', password: '1234Admin' },
+        { email: 'lali@admin.com', password: '1234Admin' },
+        { email: 'fede@admin.com', password: '1234Admin' },
+        { email: 'gian@admin.com', password: '1234Admin' },
+      ];
 
-    for (const admin of admins) {
-      const existingAdmin = await this.userRepository.findOne({
-        where: { email: admin.email },
-      });
+      for (const admin of admins) {
+        try {
+          const existingAdmin = await this.userRepository.findOne({
+            where: { email: admin.email },
+          });
 
-      if (!existingAdmin) {
-        const hashedPassword = await bcrypt.hash(admin.password, 10);
-        const newAdmin = this.userRepository.create({
-          email: admin.email,
-          password: hashedPassword,
-          nameandsurname: 'Administrador',
-          role: Role.ADMIN,
-          isActive: true,
-          profileCompleted: true,
-        });
+          if (!existingAdmin) {
+            const hashedPassword = await bcrypt.hash(admin.password, 10);
+            const newAdmin = this.userRepository.create({
+              email: admin.email,
+              password: hashedPassword,
+              nombre: 'Moderador',
+              apellido: '',
+              role: Role.MODERATOR,
+              isActive: true,
+              profileCompleted: true,
+            });
 
-        await this.userRepository.save(newAdmin);
-        console.log(`✅ Admin creado: ${admin.email}`);
-      } else {
-        console.log(`⚠️ Admin ya existe: ${admin.email}`);
+            await this.userRepository.save(newAdmin);
+            console.log(`✅ Admin creado: ${admin.email}`);
+          } else {
+            console.log(`⚠️ Admin ya existe: ${admin.email}`);
+          }
+        } catch (error) {
+          this.logger.error(
+            `Error al crear admin ${admin.email}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          );
+        }
       }
-    }
 
-    console.log('✔️ Seed de administradores completado');
+      console.log('✔️ Seed de administradores completado');
+    } catch (error) {
+      this.logger.error(
+        `Error en onModuleInit de UsersService: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
   }
 
   async createUser(body: CreateUserDto, userId: string) {
-    const user = await this.userRepository.preload({
-      id: userId,
-      nameandsurname: body.nameandsurname,
-      dni: body.dni,
-      phone: body.phone,
-      pais: { id: body.pais } as DeepPartial<Pais>,
-      ciudad: { id: body.ciudad } as DeepPartial<Ciudad>,
-      dateofbirth: body.dateofbirth,
-      motivo: { id: body.motivoid } as DeepPartial<Motivo>,
-      institucion: body.institucion,
-      comonosconocio: {
-        id: body.comonosconocioid,
-      } as DeepPartial<Comonosconocio>,
-      instagramuser: body.instagramuser || undefined,
-      areadeestudio: body.areadeestudio || undefined,
-      aboutme: body.aboutme || undefined,
-      hobbies: (body.intereses ?? []).map((id: number) => ({ id })),
-      profileCompleted: true,
-    });
+    try {
+      if (!userId) {
+        throw new NotFoundException('User ID is required');
+      }
 
-    const token = this.jwtService.sign({
-      id: user!.id,
-      role: user!.role,
-      isActive: user!.isActive,
-      profileCompleted: user!.profileCompleted,
-    });
+      const existingUser = await this.userRepository.findOne({
+        where: { id: userId },
+        select: ['email'],
+      });
 
-    if (!user) {
-      throw new NotFoundException('User not found');
+      if (!existingUser) {
+        throw new NotFoundException('User not found');
+      }
+
+      const user = await this.userRepository.preload({
+        id: userId,
+        nombre: body.nombre,
+        apellido: body.apellido,
+        tipoDocumento: body.tipoDocumento
+          ? ({ id: body.tipoDocumento } as DeepPartial<TipoDocumento>)
+          : undefined,
+        dni: body.dni,
+        phone: body.phone,
+        pais: body.pais
+          ? ({ id: body.pais } as DeepPartial<Pais>)
+          : undefined,
+        ciudad: body.ciudad
+          ? ({ id: body.ciudad } as DeepPartial<Ciudad>)
+          : undefined,
+        dateofbirth: body.dateofbirth,
+        motivo: body.motivoid
+          ? ({ id: body.motivoid } as DeepPartial<Motivo>)
+          : undefined,
+        institucion: body.institucion,
+        comonosconocio: body.comonosconocioid
+          ? ({
+              id: body.comonosconocioid,
+            } as DeepPartial<Comonosconocio>)
+          : undefined,
+        instagramuser: body.instagramuser || undefined,
+        areadeestudio: body.areadeestudio || undefined,
+        aboutme: body.aboutme || undefined,
+        hobbies: (body.intereses ?? []).map((id: number) => ({ id })),
+        profileCompleted: true,
+      });
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      const token = this.jwtService.sign({
+        id: user.id,
+        role: user.role,
+        isActive: user.isActive,
+        profileCompleted: user.profileCompleted,
+      });
+
+      await this.userRepository.save(user);
+      this.logger.log(`Usuario completó su perfil: ${existingUser.email}`);
+      return { message: 'User updated successfully', newToken: token };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      this.logger.error(
+        `Error en createUser: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      throw new InternalServerErrorException('Error al actualizar el usuario');
     }
-
-    await this.userRepository.save(user);
-    return { message: 'User updated successfully', newToken: token };
   }
 
   async getUsersWithoutActive() {
-    const users = await this.userRepository.find({
-      where: { isActive: false, role: Role.USER },
-      select: ['email', 'nameandsurname', 'dni', 'phone'],
-    });
+    try {
+      const users = await this.userRepository.find({
+        where: { isActive: false, role: Role.USER },
+        select: ['email', 'nombre', 'apellido', 'dni', 'phone'],
+      });
 
-    return users;
+      return users;
+    } catch (error) {
+      this.logger.error(
+        `Error en getUsersWithoutActive: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      throw new InternalServerErrorException(
+        'Error al obtener usuarios inactivos',
+      );
+    }
   }
 
-  async darDeAlta(email: any) {
-    const user = await this.userRepository.findOne({ where: { email } });
-    if (!user) throw new NotFoundException('User not found');
+  
 
-    if (user.isActive) {
-      return { message: 'User already active' };
+  async getAdmins() {
+    try {
+      const admins = await this.userRepository.find({
+        where: { role: Role.ADMIN },
+        select: [
+          'id',
+          'email',
+        ],
+        relations: ['casa'],
+      });
+
+      return admins;
+    } catch (error) {
+      this.logger.error(
+        `Error en getAdmins: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      throw new InternalServerErrorException(
+        'Error al obtener usuarios administradores',
+      );
     }
+  }
 
-    user.isActive = true;
-    await this.userRepository.save(user);
+  async createAdmin(email: string, password: string, casaId: number) {
+    try {
+      // Verificar si el email ya existe
+      const existingUser = await this.userRepository.findOne({
+        where: { email },
+      });
 
-    return { message: 'User activated successfully' };
+      if (existingUser) {
+        throw new NotFoundException('El email ya está registrado');
+      }
+
+      // Verificar que la casa existe
+      const casa = await this.casaRepository.findOne({
+        where: { id: casaId },
+      });
+
+      if (!casa) {
+        throw new NotFoundException('La casa especificada no existe');
+      }
+
+      // Hashear la contraseña
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Crear el administrador
+      const newAdmin = this.userRepository.create({
+        email,
+        password: hashedPassword,
+        nombre: 'Administrador',
+        apellido: '',
+        role: Role.ADMIN,
+        isActive: true,
+        profileCompleted: true,
+        casa: { id: casaId } as DeepPartial<Casa>,
+      });
+
+      await this.userRepository.save(newAdmin);
+      this.logger.log(`Administrador creado: ${email} para la casa ${casa.nombre}`);
+
+      return {
+        message: 'Administrador creado exitosamente',
+        admin: {
+          id: newAdmin.id,
+          email: newAdmin.email,
+          casa: {
+            id: casa.id,
+            nombre: casa.nombre,
+          },
+        },
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      this.logger.error(
+        `Error en createAdmin: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      throw new InternalServerErrorException('Error al crear el administrador');
+    }
+  }
+
+  async deleteAdmin(adminId: string) {
+    try {
+      // Verificar que el administrador existe y es un ADMIN
+      const admin = await this.userRepository.findOne({
+        where: { id: adminId, role: Role.ADMIN },
+      });
+
+      if (!admin) {
+        throw new NotFoundException('Administrador no encontrado');
+      }
+
+      // Eliminar el administrador
+      await this.userRepository.remove(admin);
+      this.logger.log(`Administrador eliminado: ${admin.email}`);
+
+      return {
+        message: 'Administrador eliminado exitosamente',
+        deletedAdmin: {
+          id: admin.id,
+          email: admin.email,
+        },
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      this.logger.error(
+        `Error en deleteAdmin: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      throw new InternalServerErrorException('Error al eliminar el administrador');
+    }
   }
 }

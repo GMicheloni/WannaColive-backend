@@ -18,7 +18,13 @@ export class MotivoService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    await this.seederMotivos();
+    try {
+      await this.seederMotivos();
+    } catch (error) {
+      this.logger.error(
+        `Error en onModuleInit de MotivoService: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
   }
 
   async seederMotivos() {

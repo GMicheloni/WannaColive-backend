@@ -18,7 +18,13 @@ export class ComonosconocioService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    await this.seederComonos();
+    try {
+      await this.seederComonos();
+    } catch (error) {
+      this.logger.error(
+        `Error en onModuleInit de ComonosconocioService: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
   }
 
   async seederComonos() {

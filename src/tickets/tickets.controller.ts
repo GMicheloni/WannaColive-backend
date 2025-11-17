@@ -31,6 +31,12 @@ export class TicketsController {
   @Roles(Role.USER)
   @UseGuards(AuthGuard, RolesGuard)
   create(@Body() createTicketDto: CreateTicketDto, @Req() req) {
+    if (!req || !req.user || !req.user.id) {
+      throw new Error('User not authenticated');
+    }
+    if (!createTicketDto || !createTicketDto.asuntoId || !createTicketDto.descripcion) {
+      throw new Error('AsuntoId and descripcion are required');
+    }
     const userId = req.user.id;
     const { asuntoId, descripcion } = createTicketDto;
     return this.ticketsService.create(asuntoId, descripcion, userId);
@@ -39,8 +45,10 @@ export class TicketsController {
   @Get()
   @Roles(Role.USER)
   @UseGuards(AuthGuard, RolesGuard)
-  @Get()
   async getMyTickets(@Req() req) {
+    if (!req || !req.user || !req.user.id) {
+      throw new Error('User not authenticated');
+    }
     const userId = req.user.id;
     return await this.ticketsService.getByUserId(userId);
   }
@@ -49,6 +57,12 @@ export class TicketsController {
   @Roles(Role.MODERATOR, Role.ADMIN)
   @UseGuards(AuthGuard, RolesGuard)
   closeTicket(@Param('id') id: string, @Body() body: any) {
+    if (!id) {
+      throw new Error('Ticket ID is required');
+    }
+    if (!body || !body.comentarioAdmin) {
+      throw new Error('Comentario admin is required');
+    }
     const { comentarioAdmin } = body;
     return this.ticketsService.closeTicket(id, comentarioAdmin);
   }

@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { Body, Controller, Get, Patch, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/user.dto';
+import { CreateUserDto, CreateAdminDto } from './dto/user.dto';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
 import { AuthGuard } from 'src/auth/guard/auth.guard';
 import { Roles } from 'src/decorators/role.decorator';
@@ -14,6 +14,9 @@ export class UsersController {
   @Roles(Role.USER)
   @UseGuards(AuthGuard, RolesGuard)
   createUser(@Body() body: CreateUserDto, @Req() req) {
+    if (!req || !req.user || !req.user.id) {
+      throw new Error('User not authenticated');
+    }
     return this.usersService.createUser(body, req.user.id);
   }
 
@@ -23,12 +26,27 @@ export class UsersController {
   getUsersWithoutActive() {
     return this.usersService.getUsersWithoutActive();
   }
-  @Patch('/active')
-  @Roles(Role.ADMIN, Role.MODERATOR)
+  
+
+  @Get('admins')
+  @Roles(Role.MODERATOR)
   @UseGuards(AuthGuard, RolesGuard)
-  darDeAlta(@Body() body) {
-    const { email } = body;
-    return this.usersService.darDeAlta(email);
+  getAdmins() {
+    return this.usersService.getAdmins();
+  }
+
+  @Post('admin')
+  @Roles(Role.MODERATOR)
+  @UseGuards(AuthGuard, RolesGuard)
+  createAdmin(@Body() body: CreateAdminDto) {
+    return this.usersService.createAdmin(body.email, body.password, body.casa);
+  }
+
+  @Delete('admin/:id')
+  @Roles(Role.MODERATOR)
+  @UseGuards(AuthGuard, RolesGuard)
+  deleteAdmin(@Param('id') id: string) {
+    return this.usersService.deleteAdmin(id);
   }
 
   /*  @Put(':id/admin')

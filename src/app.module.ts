@@ -10,10 +10,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AsuntoModule } from './seeders/asunto/asunto.module';
 import { MotivoModule } from './seeders/motivo/motivo.module';
 import { ComonosconocioModule } from './seeders/comonosconocio/comonosconocio.module';
+import { TipoDocumentoModule } from './seeders/tipodocumento/tipodocumento.module';
+import { CasaModule } from './seeders/casa/casa.module';
 import { JwtModule } from '@nestjs/jwt';
 import { CountriesModule } from './countries/countries.module';
 import { CitiesModule } from './cities/cities.module';
 import { HobbiesModule } from './hobbies/hobbies.module';
+import { ContratosModule } from './contratos/contratos.module';
+import { NewsModule } from './news/news.module';
 
 @Module({
   imports: [
@@ -34,9 +38,13 @@ import { HobbiesModule } from './hobbies/hobbies.module';
     AsuntoModule,
     MotivoModule,
     ComonosconocioModule,
+    TipoDocumentoModule,
+    CasaModule,
     CountriesModule,
     CitiesModule,
     HobbiesModule,
+    ContratosModule,
+    NewsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

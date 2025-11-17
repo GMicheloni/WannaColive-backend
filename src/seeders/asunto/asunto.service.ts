@@ -19,7 +19,13 @@ export class AsuntoService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    await this.seeder();
+    try {
+      await this.seeder();
+    } catch (error) {
+      this.logger.error(
+        `Error en onModuleInit de AsuntoService: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
   }
 
   async seeder() {

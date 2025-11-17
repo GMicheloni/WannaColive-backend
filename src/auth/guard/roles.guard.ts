@@ -11,19 +11,34 @@ export class RolesGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    const request = context.switchToHttp().getRequest();
-    const requiredRoles = this.reflector.getAllAndOverride<Role[]>('roles', [
-      context.getHandler(),
-      context.getClass(),
-    ]);
-    const user = request.user;
+    try {
+      const request = context.switchToHttp().getRequest();
+      if (!request) {
+        return false;
+      }
 
-    const hasRole = () =>
-      requiredRoles.some((role) => user.role.includes(role));
-    console.log('Required Roles:', requiredRoles);
-    console.log('User Role:', user?.role);
-    console.log('Has Role:', hasRole());
-    const valid: boolean = user && requiredRoles && hasRole();
-    return valid;
+      const requiredRoles = this.reflector.getAllAndOverride<Role[]>('roles', [
+        context.getHandler(),
+        context.getClass(),
+      ]);
+
+      if (!requiredRoles || !Array.isArray(requiredRoles) || requiredRoles.length === 0) {
+        return false;
+      }
+
+      const user = request.user;
+      if (!user || !user.role) {
+        return false;
+      }
+
+      // Verificar si user.role es un array o un string
+      const userRoles = Array.isArray(user.role) ? user.role : [user.role];
+      
+      const hasRole = requiredRoles.some((role) => userRoles.includes(role));
+      
+      return hasRole;
+    } catch (error) {
+      return false;
+    }
   }
 }

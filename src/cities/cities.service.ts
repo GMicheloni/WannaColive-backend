@@ -9,7 +9,16 @@ export class CitiesService {
     @InjectRepository(Ciudad)
     private readonly ciudadRepository: Repository<Ciudad>,
   ) {}
-  getAllCitiesFromId(id: number) {
-    return this.ciudadRepository.find({ where: { pais: { id } } });
+  async getAllCitiesFromId(id: number) {
+    try {
+      if (!id || typeof id !== 'number') {
+        throw new Error('Invalid country ID');
+      }
+      return await this.ciudadRepository.find({ where: { pais: { id } } });
+    } catch (error) {
+      throw new Error(
+        `Error al obtener ciudades: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
   }
 }
