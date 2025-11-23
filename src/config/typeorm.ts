@@ -5,7 +5,10 @@ const envFilePath =
   process.env.NODE_ENV === 'production'
     ? '.env.production'
     : '.env.development';
+
 dotenv.config({ path: envFilePath });
+
+const isProd = process.env.NODE_ENV === 'production';
 
 const config = {
   type: 'postgres',
@@ -18,12 +21,15 @@ const config = {
   entities: ['dist/**/*.entity{.ts,.js}'],
   migrations: ['dist/migrations/*{.ts,.js}'],
   autoLoadEntities: true,
-  synchronize: true,
-  dropSchema: false,
-  // ⚠️ solo en desarrollo - elimina y recrea el esquema cada vez que se inicia la app
-  ssl: {
-    rejectUnauthorized: false, // importante para Render
-  },
+
+  // Solo sincroniza y dropea el esquema en desarrollo
+  synchronize: !isProd,
+  /* dropSchema: !isProd, */
+
+  // Solo activa SSL en producción
+  ssl: isProd
+    ? { rejectUnauthorized: false }
+    : false,
 };
 
 export default registerAs('typeorm', () => config);
