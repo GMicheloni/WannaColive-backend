@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { NewsService } from './news.service';
 import { CreateNewsDto } from './dto/create-news.dto';
 import { AuthGuard } from 'src/auth/guard/auth.guard';
@@ -22,6 +30,18 @@ export class NewsController {
   @UseGuards(AuthGuard, RolesGuard)
   findAll() {
     return this.newsService.findAll();
+  }
+
+  @Get('forme')
+  @Roles(Role.USER, Role.ADMIN, Role.MODERATOR)
+  @UseGuards(AuthGuard, RolesGuard)
+  getForMe(@Req() req) {
+    if (!req || !req.user || !req.user.role) {
+      throw new Error('User not authenticated');
+    }
+    const userRole = req.user.role;
+    const casaNombre = req.user.casa || null;
+    return this.newsService.getForMe(userRole, casaNombre);
   }
 }
 

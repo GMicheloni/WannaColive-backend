@@ -1,8 +1,14 @@
 import {
+  ArrayMinSize,
+  IsArray,
+  IsEnum,
+  IsInt,
   IsNotEmpty,
   IsString,
   MaxLength,
 } from 'class-validator';
+import { DestinatarioEnum } from '../entities/news.entity';
+import { Type } from 'class-transformer';
 
 export class CreateNewsDto {
   @IsString()
@@ -18,5 +24,15 @@ export class CreateNewsDto {
   @IsString()
   @IsNotEmpty({ message: 'La descripción es obligatoria' })
   descripcion: string;
+
+  @IsEnum(DestinatarioEnum, { message: 'El destinatario debe ser "todos", "colivers" o "admin"' })
+  @IsNotEmpty({ message: 'El destinatario es obligatorio' })
+  destinatario: DestinatarioEnum;
+
+  @IsArray()
+  @ArrayMinSize(0) // permite []
+  @IsInt({ each: true })
+  @Type(() => Number)
+  casas: number[];
 }
 
