@@ -12,21 +12,26 @@ const isProd = process.env.NODE_ENV === 'production';
 
 const config = {
   type: 'postgres',
-  url: process.env.DB_URL,
+
+  // ⬇️ Si usas una URL (Render/Neon/ElephantSQL), TypeORM usará esto
+  url: process.env.DB_URL || undefined,
+
+  // ⬇️ Solo si NO usas una URL
   host: process.env.DB_HOST,
   port: +process.env.DB_PORT!,
   username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
+
   entities: ['dist/**/*.entity{.ts,.js}'],
   migrations: ['dist/migrations/*{.ts,.js}'],
+
   autoLoadEntities: true,
   synchronize: true,
-  dropSchema: false,
-  // ⚠️ solo en desarrollo - elimina y recrea el esquema cada vez que se inicia la app
-  ssl: {
-    rejectUnauthorized: false, // importante para Render
-  },
+
+  ssl: isProd
+    ? { rejectUnauthorized: false } // Render exige esto
+    : false,
 };
 
 export default registerAs('typeorm', () => config);
