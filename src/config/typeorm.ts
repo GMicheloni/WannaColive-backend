@@ -21,15 +21,12 @@ const config = {
   entities: ['dist/**/*.entity{.ts,.js}'],
   migrations: ['dist/migrations/*{.ts,.js}'],
   autoLoadEntities: true,
-
-  // Solo sincroniza y dropea el esquema en desarrollo
-  synchronize: !isProd,
-  /* dropSchema: !isProd, */
-
-  // Solo activa SSL en producción
-  ssl: isProd
-    ? { rejectUnauthorized: false }
-    : false,
+  synchronize: true,
+  dropSchema: false,
+  // ⚠️ solo en desarrollo - elimina y recrea el esquema cada vez que se inicia la app
+  ssl: {
+    rejectUnauthorized: false, // importante para Render
+  },
 };
 
 export default registerAs('typeorm', () => config);
