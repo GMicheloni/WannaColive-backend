@@ -37,9 +37,9 @@ export class ContratosService {
         throw new NotFoundException('Usuario no encontrado');
       }
 
-      // Verificar si el usuario ya tiene un contrato
+      // Verificar si el usuario ya tiene un contrato activo (no eliminado)
       const existingContrato = await this.contratoRepository.findOne({
-        where: { usuario: { id: user.id } },
+        where: { usuario: { id: user.id }, isDeleted: false },
       });
 
       if (existingContrato) {
@@ -109,7 +109,7 @@ export class ContratosService {
       }
 
       const contrato = await this.contratoRepository.findOne({
-        where: { usuario: { id: userId } },
+        where: { usuario: { id: userId }, isDeleted: false },
         relations: ['casa'],
       });
 
@@ -132,6 +132,7 @@ export class ContratosService {
   async findAll() {
     try {
       const contratos = await this.contratoRepository.find({
+        where: { isDeleted: false },
         relations: ['casa', 'usuario'],
       });
 
@@ -158,7 +159,7 @@ export class ContratosService {
   async update(id: string, updateContratoDto: UpdateContratoDto) {
     try {
       const contrato = await this.contratoRepository.findOne({
-        where: { id },
+        where: { id, isDeleted: false },
         relations: ['casa'],
       });
 
@@ -223,7 +224,7 @@ export class ContratosService {
   async delete(id: string) {
     try {
       const contrato = await this.contratoRepository.findOne({
-        where: { id },
+        where: { id, isDeleted: false },
         relations: ['usuario'],
       });
 
@@ -234,12 +235,14 @@ export class ContratosService {
       // Actualizar el usuario: desactivar y quitar la casa
       if (contrato.usuario) {
         contrato.usuario.isActive = false;
-        contrato.usuario.casa = undefined as any;
+        contrato.usuario.casa = null;
         await this.userRepository.save(contrato.usuario);
       }
 
-      await this.contratoRepository.remove(contrato);
-      this.logger.log(`Contrato eliminado: ${id}`);
+      // Soft delete: actualizar isDeleted a true en lugar de borrar físicamente
+      contrato.isDeleted = true;
+      await this.contratoRepository.save(contrato);
+      this.logger.log(`Contrato marcado como eliminado (soft delete): ${id}`);
 
       return {
         message: 'Contrato eliminado exitosamente',

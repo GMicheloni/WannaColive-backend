@@ -4,7 +4,6 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -21,7 +20,7 @@ export class Contrato {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @OneToOne(() => User, (user) => user.contrato, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.contratos, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'usuarioid' })
   usuario: User;
 
@@ -53,5 +52,8 @@ export class Contrato {
 
   @UpdateDateColumn()
   actualizadoEn: Date;
+
+  @Column({ default: false })
+  isDeleted: boolean;
 }
 

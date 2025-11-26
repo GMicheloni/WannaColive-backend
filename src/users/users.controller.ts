@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto, CreateAdminDto } from './dto/user.dto';
+import { CreateUserDto, CreateAdminDto, UpdateProfileDto } from './dto/user.dto';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
 import { AuthGuard } from 'src/auth/guard/auth.guard';
 import { Roles } from 'src/decorators/role.decorator';
@@ -49,8 +49,20 @@ export class UsersController {
     return this.usersService.deleteAdmin(id);
   }
 
-  /*  @Put(':id/admin')
-  makeAdmin(@Param('id') id: string) {
-    return this.usersService.makeAdmin(id);
-  } */
+  @Get("/me")
+  @Roles(Role.USER)
+  @UseGuards(AuthGuard, RolesGuard)
+  getMe(@Req() req) {
+    return this.usersService.getMe(req.user.id);
+  }
+
+  @Patch("/profile")
+  @Roles(Role.USER)
+  @UseGuards(AuthGuard, RolesGuard)
+  updateProfile(@Body() body: UpdateProfileDto, @Req() req) {
+    if (!req || !req.user || !req.user.id) {
+      throw new Error('User not authenticated');
+    }
+    return this.usersService.updateProfile(req.user.id, body);
+  }
 }

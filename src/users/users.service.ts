@@ -5,7 +5,7 @@ import {
   Logger,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/user.dto';
+import { CreateUserDto, UpdateProfileDto } from './dto/user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository, DeepPartial } from 'typeorm';
@@ -283,6 +283,159 @@ export class UsersService implements OnModuleInit {
         `Error en deleteAdmin: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
       throw new InternalServerErrorException('Error al eliminar el administrador');
+    }
+  }
+
+  async getMe(userId: string) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id: userId },
+        relations: ['motivo', 'comonosconocio', 'hobbies', 'tipoDocumento', 'pais', 'ciudad'],
+      });
+
+      if (!user) {
+        throw new NotFoundException('Usuario no encontrado');
+      }
+
+      // Retornar solo los campos necesarios sin incluir el password
+      return {
+        email: user.email,
+        nombre: user.nombre,
+        apellido: user.apellido,
+        dni: user.dni,
+        phone: user.phone,
+        dateofbirth: user.dateofbirth,
+        institucion: user.institucion,
+        instagramuser: user.instagramuser,
+        areadeestudio: user.areadeestudio,
+        aboutme: user.aboutme,
+        motivo: user.motivo?.motivo,
+        comonosconocio: user.comonosconocio?.como,
+        hobbies: user.hobbies?.map((hobby) => hobby.nombre) || [],
+        tipoDocumento: user.tipoDocumento?.tipo,
+        pais: user.pais?.nombre,
+        ciudad: user.ciudad?.nombre,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Error en getMe: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      throw new InternalServerErrorException('Error al obtener el usuario');
+    }
+  }
+
+  async updateProfile(userId: string, updateProfileDto: UpdateProfileDto) {
+    try {
+      if (!userId) {
+        throw new NotFoundException('User ID is required');
+      }
+
+      // Buscar el usuario
+      const user = await this.userRepository.findOne({
+        where: { id: userId },
+      });
+
+      if (!user) {
+        throw new NotFoundException('Usuario no encontrado');
+      }
+
+      // Preparar el objeto de actualización
+      const updateData: DeepPartial<User> = { id: userId };
+
+      // Actualizar solo los campos que se proporcionaron
+      if (updateProfileDto.nombre !== undefined) {
+        updateData.nombre = updateProfileDto.nombre;
+      }
+
+      if (updateProfileDto.apellido !== undefined) {
+        updateData.apellido = updateProfileDto.apellido;
+      }
+
+      if (updateProfileDto.dni !== undefined) {
+        updateData.dni = updateProfileDto.dni;
+      }
+
+      if (updateProfileDto.phone !== undefined) {
+        updateData.phone = updateProfileDto.phone;
+      }
+
+      if (updateProfileDto.dateofbirth !== undefined) {
+        updateData.dateofbirth = new Date(updateProfileDto.dateofbirth);
+      }
+
+      if (updateProfileDto.institucion !== undefined) {
+        updateData.institucion = updateProfileDto.institucion;
+      }
+
+      if (updateProfileDto.instagramuser !== undefined) {
+        updateData.instagramuser = updateProfileDto.instagramuser || null;
+      }
+
+      if (updateProfileDto.areadeestudio !== undefined) {
+        updateData.areadeestudio = updateProfileDto.areadeestudio || null;
+      }
+
+      if (updateProfileDto.aboutme !== undefined) {
+        updateData.aboutme = updateProfileDto.aboutme || null;
+      }
+
+      // Actualizar relaciones si se proporcionaron
+      if (updateProfileDto.tipoDocumento !== undefined) {
+        updateData.tipoDocumento = {
+          id: updateProfileDto.tipoDocumento,
+        } as DeepPartial<TipoDocumento>;
+      }
+
+      if (updateProfileDto.pais !== undefined) {
+        updateData.pais = { id: updateProfileDto.pais } as DeepPartial<Pais>;
+      }
+
+      if (updateProfileDto.ciudad !== undefined) {
+        updateData.ciudad = {
+          id: updateProfileDto.ciudad,
+        } as DeepPartial<Ciudad>;
+      }
+
+      if (updateProfileDto.motivoid !== undefined) {
+        updateData.motivo = {
+          id: updateProfileDto.motivoid,
+        } as DeepPartial<Motivo>;
+      }
+
+      if (updateProfileDto.comonosconocioid !== undefined) {
+        updateData.comonosconocio = {
+          id: updateProfileDto.comonosconocioid,
+        } as DeepPartial<Comonosconocio>;
+      }
+
+      if (updateProfileDto.intereses !== undefined) {
+        updateData.hobbies = updateProfileDto.intereses.map((id: number) => ({
+          id,
+        })) as DeepPartial<any>[];
+      }
+
+      // Cargar el usuario con preload y guardar
+      const updatedUser = await this.userRepository.preload(updateData);
+
+      if (!updatedUser) {
+        throw new NotFoundException('Usuario no encontrado');
+      }
+
+      await this.userRepository.save(updatedUser);
+      this.logger.log(`Perfil actualizado para usuario: ${userId}`);
+
+      return {
+        message: 'Perfil actualizado exitosamente',
+        userId: updatedUser.id,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      this.logger.error(
+        `Error en updateProfile: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      throw new InternalServerErrorException('Error al actualizar el perfil');
     }
   }
 }

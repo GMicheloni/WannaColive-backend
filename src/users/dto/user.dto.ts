@@ -118,7 +118,84 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsArray()
-  @ArrayNotEmpty()
+  
+  @ArrayUnique()
+  @IsInt({ each: true })
+  @Type(() => Number)
+  intereses?: number[];
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(30)
+  areadeestudio?: string;
+
+  @IsOptional()
+  @IsString()
+  aboutme?: string;
+}
+
+export class UpdateProfileDto {
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  tipoDocumento?: number;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  nombre?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  apellido?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 30)
+  dni?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 15)
+  phone?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  pais?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  ciudad?: number;
+
+  @IsOptional()
+  @IsDateString()
+  dateofbirth?: Date;
+
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  motivoid?: number;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  institucion?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  comonosconocioid?: number;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(30)
+  instagramuser?: string;
+
+  @IsOptional()
+  @IsArray()
   @ArrayUnique()
   @IsInt({ each: true })
   @Type(() => Number)

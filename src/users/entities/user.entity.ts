@@ -82,8 +82,8 @@ export class User {
   @OneToMany(() => Ticket, (ticket) => ticket.usuario)
   tickets: Ticket[];
 
-  @OneToOne(() => Contrato, (contrato) => contrato.usuario)
-  contrato: Contrato;
+  @OneToMany(() => Contrato, (contrato) => contrato.usuario)
+  contratos: Contrato[];
 
   @ManyToMany(() => Hobby)
   @JoinTable()
@@ -97,5 +97,5 @@ export class User {
 
   @ManyToOne(() => Casa, (casa) => casa.usuarios, { nullable: true })
   @JoinColumn({ name: 'casaid' })
-  casa: Casa;
+  casa?: Casa | null;
 }
