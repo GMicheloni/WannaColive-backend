@@ -351,11 +351,7 @@ export class UsersService implements OnModuleInit {
       if (updateProfileDto.apellido !== undefined) {
         updateData.apellido = updateProfileDto.apellido;
       }
-
-      if (updateProfileDto.dni !== undefined) {
-        updateData.dni = updateProfileDto.dni;
-      }
-
+      
       if (updateProfileDto.phone !== undefined) {
         updateData.phone = updateProfileDto.phone;
       }
@@ -380,12 +376,8 @@ export class UsersService implements OnModuleInit {
         updateData.aboutme = updateProfileDto.aboutme || null;
       }
 
-      // Actualizar relaciones si se proporcionaron
-      if (updateProfileDto.tipoDocumento !== undefined) {
-        updateData.tipoDocumento = {
-          id: updateProfileDto.tipoDocumento,
-        } as DeepPartial<TipoDocumento>;
-      }
+
+      
 
       if (updateProfileDto.pais !== undefined) {
         updateData.pais = { id: updateProfileDto.pais } as DeepPartial<Pais>;

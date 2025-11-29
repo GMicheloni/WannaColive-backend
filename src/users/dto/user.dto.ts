@@ -135,10 +135,6 @@ export class CreateUserDto {
 }
 
 export class UpdateProfileDto {
-  @IsOptional()
-  @IsInt()
-  @Type(() => Number)
-  tipoDocumento?: number;
 
   @IsOptional()
   @IsString()
@@ -149,11 +145,6 @@ export class UpdateProfileDto {
   @IsString()
   @MaxLength(50)
   apellido?: string;
-
-  @IsOptional()
-  @IsString()
-  @Length(1, 30)
-  dni?: string;
 
   @IsOptional()
   @IsString()
