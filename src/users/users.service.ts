@@ -21,6 +21,7 @@ import { Casa } from 'src/seeders/casa/entities/casa.entity';
 
 @Injectable()
 export class UsersService implements OnModuleInit {
+  
   private readonly logger = new Logger(UsersService.name);
 
   constructor(
@@ -436,6 +437,20 @@ export class UsersService implements OnModuleInit {
         `Error en updateProfile: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
       throw new InternalServerErrorException('Error al actualizar el perfil');
+    }
+  }
+  async getActiveUsers() {
+    try {
+      const users = await this.userRepository.find({
+        where: { isActive: true, role: Role.USER }, 
+        select: ['email', 'nombre', 'apellido'],
+      });
+      return users;
+    } catch (error) {
+      this.logger.error(
+        `Error en getActiveUsers: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      throw new InternalServerErrorException('Error al obtener los usuarios activos');
     }
   }
 }

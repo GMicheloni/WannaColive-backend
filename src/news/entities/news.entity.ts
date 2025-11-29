@@ -6,13 +6,16 @@ import {
   JoinTable,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  ManyToOne,
 } from 'typeorm';
 import { Casa } from 'src/seeders/casa/entities/casa.entity';
+import { User } from 'src/users/entities/user.entity';
 
 export enum DestinatarioEnum {
   TODOS = "todos",
   COLIVERS = "colivers",
   ADMIN = "administradores",
+  USUARIO = "usuario", 
 }
 
 
@@ -41,7 +44,8 @@ export class News {
 @JoinTable()
 casas: Casa[];
 
- 
+@ManyToOne(() => User, { nullable: true })
+usuarioDestino?: User;
   
 
   @CreateDateColumn()

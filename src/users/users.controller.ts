@@ -26,6 +26,12 @@ export class UsersController {
   getUsersWithoutActive() {
     return this.usersService.getUsersWithoutActive();
   }
+  @Get('actives')
+  @Roles(Role.ADMIN, Role.MODERATOR)
+  @UseGuards(AuthGuard)
+  getActiveUsers() {
+    return this.usersService.getActiveUsers();
+  }
   
 
   @Get('admins')

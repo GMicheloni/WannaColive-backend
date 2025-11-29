@@ -1,9 +1,11 @@
 import {
   ArrayMinSize,
   IsArray,
+  IsEmail,
   IsEnum,
   IsInt,
   IsNotEmpty,
+  IsOptional,
   IsString,
   MaxLength,
 } from 'class-validator';
@@ -25,14 +27,24 @@ export class CreateNewsDto {
   @IsNotEmpty({ message: 'La descripción es obligatoria' })
   descripcion: string;
 
-  @IsEnum(DestinatarioEnum, { message: 'El destinatario debe ser "todos", "colivers" o "admin"' })
+  @IsEnum(DestinatarioEnum, {
+    message:
+      'El destinatario debe ser "todos", "colivers", "admin" o "usuario"',
+  })
   @IsNotEmpty({ message: 'El destinatario es obligatorio' })
   destinatario: DestinatarioEnum;
 
   @IsArray()
+  @IsOptional()
   @ArrayMinSize(0) // permite []
   @IsInt({ each: true })
   @Type(() => Number)
-  casas: number[];
+  casas?: number[];
+
+  @IsOptional()
+  @IsEmail({}, { message: 'El usuarioDestino debe ser un email válido' })
+  @IsString()
+  @MaxLength(100)
+  usuarioDestino?: string;
 }
 

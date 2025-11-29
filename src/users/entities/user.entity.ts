@@ -19,6 +19,7 @@ import { Motivo } from 'src/seeders/motivo/entities/motivo.entity';
 import { TipoDocumento } from 'src/seeders/tipodocumento/entities/tipodocumento.entity';
 import { Casa } from 'src/seeders/casa/entities/casa.entity';
 import { Contrato } from 'src/contratos/entities/contrato.entity';
+import { News } from 'src/news/entities/news.entity';
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
@@ -98,4 +99,7 @@ export class User {
   @ManyToOne(() => Casa, (casa) => casa.usuarios, { nullable: true })
   @JoinColumn({ name: 'casaid' })
   casa?: Casa | null;
+  
+  @OneToMany(() => News, (news) => news.usuarioDestino)
+  news: News[];
 }

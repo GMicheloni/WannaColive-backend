@@ -36,12 +36,13 @@ export class NewsController {
   @Roles(Role.USER, Role.ADMIN, Role.MODERATOR)
   @UseGuards(AuthGuard, RolesGuard)
   getForMe(@Req() req) {
-    if (!req || !req.user || !req.user.role) {
+    if (!req || !req.user || !req.user.role || !req.user.id) {
       throw new Error('User not authenticated');
     }
     const userRole = req.user.role;
     const casaNombre = req.user.casa || null;
-    return this.newsService.getForMe(userRole, casaNombre);
+    const userId = req.user.id;
+    return this.newsService.getForMe(userRole, casaNombre, userId);
   }
 }
 
