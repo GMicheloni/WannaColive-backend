@@ -165,4 +165,26 @@ export class TicketsService {
       throw new InternalServerErrorException('Error al cerrar el ticket');
     }
   }
+  async processTicket(id: string, comentarioAdmin: string) {
+    try { 
+      if (!comentarioAdmin || typeof comentarioAdmin !== 'string') {
+        throw new NotFoundException('Comentario admin is required');
+      }
+      const result = await this.ticketRepository.update(id, {
+        estado: EstadoTicket.EN_PROCESO,
+        comentarioAdmin,
+      });
+      return {
+        message: 'Ticket procesado correctamente',
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      this.logger.error(
+        `Error en processTicket: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      throw new InternalServerErrorException('Error al procesar el ticket');
+    }
+  }
 }

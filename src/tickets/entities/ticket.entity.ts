@@ -12,6 +12,7 @@ import { User } from 'src/users/entities/user.entity';
 
 export enum EstadoTicket {
   ABIERTO = 'Abierto',
+  EN_PROCESO = 'En Proceso',
   CERRADO = 'Cerrado',
 }
 @Entity()

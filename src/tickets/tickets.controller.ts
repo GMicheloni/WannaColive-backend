@@ -53,6 +53,18 @@ export class TicketsController {
     return await this.ticketsService.getByUserId(userId);
   }
 
+
+  @Put('/:id/process')
+  @Roles(Role.MODERATOR, Role.ADMIN)
+  @UseGuards(AuthGuard, RolesGuard)
+  processTicket(@Param('id') id: string, @Body() body: any) {
+    if (!id) {
+      throw new Error('Ticket ID is required');
+    }
+    
+    const { comentarioAdmin } = body;
+    return this.ticketsService.processTicket(id, comentarioAdmin);
+  }
   @Put('/:id/close')
   @Roles(Role.MODERATOR, Role.ADMIN)
   @UseGuards(AuthGuard, RolesGuard)
