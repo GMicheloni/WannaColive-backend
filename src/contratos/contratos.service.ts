@@ -12,6 +12,9 @@ import { User } from 'src/users/entities/user.entity';
 import { Casa } from 'src/seeders/casa/entities/casa.entity';
 import { CreateContratoDto } from './dto/create-contrato.dto';
 import { UpdateContratoDto } from './dto/update-contrato.dto';
+import { EmailService } from 'src/email/email.service';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class ContratosService {
@@ -24,6 +27,7 @@ export class ContratosService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Casa)
     private readonly casaRepository: Repository<Casa>,
+    private readonly emailService: EmailService,
   ) {}
 
   async create(createContratoDto: CreateContratoDto) {
@@ -78,6 +82,22 @@ export class ContratosService {
       this.logger.log(
         `Contrato creado para usuario ${createContratoDto.email} en casa ${casa.nombre}. Usuario activado.`,
       );
+
+      // Enviar email de bienvenida con el template
+      try {
+        const emailHtml = this.loadEmailTemplate(savedContrato, casa, user);
+        await this.emailService.sendEmail(
+          user.email,
+          '¡Tu usuario ha sido dado de alta! 🎉',
+          emailHtml,
+        );
+        this.logger.log(`Email de bienvenida enviado a: ${user.email}`);
+      } catch (emailError) {
+        this.logger.error(
+          `Error al enviar email de bienvenida a ${user.email}: ${emailError instanceof Error ? emailError.message : 'Unknown error'}`,
+        );
+        // Continuar aunque falle el email - el contrato ya está creado
+      }
 
       return {
         message: 'Contrato creado exitosamente',
@@ -255,6 +275,87 @@ export class ContratosService {
         `Error en delete: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
       throw new InternalServerErrorException('Error al eliminar el contrato');
+    }
+  }
+
+  private loadEmailTemplate(
+    contrato: Contrato,
+    casa: Casa,
+    usuario: User,
+  ): string {
+    try {
+      // Intentar diferentes rutas según si estamos en desarrollo o producción
+      const possiblePaths = [
+        path.join(__dirname, '../../email/templates/Bienvenido.html'), // Desarrollo
+        path.join(__dirname, '../../../src/email/templates/Bienvenido.html'), // Producción compilado
+        path.join(process.cwd(), 'src/email/templates/Bienvenido.html'), // Ruta absoluta desde raíz
+        path.join(process.cwd(), 'dist/src/email/templates/Bienvenido.html'), // Ruta absoluta compilado
+      ];
+
+      let templatePath: string | null = null;
+      for (const possiblePath of possiblePaths) {
+        if (fs.existsSync(possiblePath)) {
+          templatePath = possiblePath;
+          break;
+        }
+      }
+
+      if (!templatePath) {
+        throw new Error('No se pudo encontrar el template de email');
+      }
+
+      let template = fs.readFileSync(templatePath, 'utf-8');
+
+      // Formatear tipo de habitación
+      const tipoHabitacionFormateado =
+        contrato.tipoHabitacion === TipoHabitacion.COMPARTIDA
+          ? 'Compartida'
+          : 'Privada';
+
+      // Formatear fechas
+      const formatDate = (date: Date): string => {
+        return new Intl.DateTimeFormat('es-AR', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        }).format(date);
+      };
+
+      // Obtener nombre del usuario o usar email si no tiene nombre
+      const nombreUsuario = usuario.nombre || usuario.email.split('@')[0];
+
+      // Reemplazar placeholders
+      template = template.replace(/{{nombre}}/g, nombreUsuario);
+      template = template.replace(/{{casa}}/g, casa.nombre);
+      template = template.replace(
+        /{{tipoHabitacion}}/g,
+        tipoHabitacionFormateado,
+      );
+      template = template.replace(/{{nroHabitacion}}/g, contrato.nroHabitacion || 'N/A');
+      template = template.replace(
+        /{{inicioContrato}}/g,
+        formatDate(contrato.inicioContrato),
+      );
+      template = template.replace(
+        /{{finContrato}}/g,
+        formatDate(contrato.finContrato),
+      );
+
+      return template;
+    } catch (error) {
+      this.logger.error(
+        `Error al cargar el template de email: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      // Retornar un HTML simple como fallback
+      return `
+        <h1>¡Tu usuario ha sido dado de alta! 🎉</h1>
+        <p>Hola ${usuario.nombre || usuario.email},</p>
+        <p>¡Buenas noticias! Tu solicitud fue aprobada y ya tenés asignación dentro de WannaColive.</p>
+        <p><strong>Casa:</strong> ${casa.nombre}</p>
+        <p><strong>Tipo de habitación:</strong> ${contrato.tipoHabitacion === TipoHabitacion.COMPARTIDA ? 'Compartida' : 'Privada'}</p>
+        <p><strong>N° habitación:</strong> ${contrato.nroHabitacion || 'N/A'}</p>
+        <p>Ya podés ingresar a la app para ver tu perfil, tu casa y todas las funciones disponibles.</p>
+      `;
     }
   }
 }

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es" style="margin:0; padding:0;">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Bienvenido a WannaColive App</title>
+  </head>
+
+  <body
+    style="
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f7;
+      margin: 0;
+      padding: 0;
+    "
+  >
+    <table
+      width="100%"
+      cellpadding="0"
+      cellspacing="0"
+      style="background-color: #f4f4f7; padding: 20px 0;"
+    >
+      <tr>
+        <td align="center">
+          <table
+            width="600"
+            cellpadding="0"
+            cellspacing="0"
+            style="
+              background-color: #ffffff;
+              border-radius: 8px;
+              overflow: hidden;
+              box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            "
+          >
+            <!-- Header -->
+            <tr>
+              <td
+                style="
+                  background-color: #4f46e5;
+                  padding: 20px;
+                  color: white;
+                  text-align: center;
+                  font-size: 24px;
+                  font-weight: bold;
+                "
+              >
+                ¡Tu usuario ha sido dado de alta! 🎉
+              </td>
+            </tr>
+
+            <!-- Content -->
+            <tr>
+              <td style="padding: 30px; color: #333333; font-size: 15px;">
+                <p>Hola <strong>{{nombre}}</strong>,</p>
+
+                <p>
+                  ¡Buenas noticias! Tu solicitud fue aprobada y ya tenés
+                  asignación dentro de WannaColive.
+                </p>
+
+                <p style="margin-top: 25px; font-size: 16px;">
+                  <strong>Detalles de tu contrato:</strong>
+                </p>
+
+                <table
+                  width="100%"
+                  cellpadding="0"
+                  cellspacing="0"
+                  style="margin-top: 10px;"
+                >
+                  <tr>
+                    <td style="padding: 6px 0;"><strong>Casa:</strong></td>
+                    <td style="padding: 6px 0;">{{casa}}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px 0;">
+                      <strong>Tipo de habitación:</strong>
+                    </td>
+                    <td style="padding: 6px 0;">
+                      {{tipoHabitacion}}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px 0;">
+                      <strong>N° habitación:</strong>
+                    </td>
+                    <td style="padding: 6px 0;">
+                      {{nroHabitacion}}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px 0;"><strong>Inicio:</strong></td>
+                    <td style="padding: 6px 0;">{{inicioContrato}}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px 0;"><strong>Fin:</strong></td>
+                    <td style="padding: 6px 0;">{{finContrato}}</td>
+                  </tr>
+                </table>
+
+                <p style="margin-top: 30px;">
+                  Ya podés ingresar a la app para ver tu perfil, tu casa y todas
+                  las funciones disponibles.
+                </p>
+
+                <p>
+                  Si necesitás ayuda, nuestro equipo está disponible para asistirte.
+                </p>
+
+                <p style="margin-top: 35px;">
+                  ¡Bienvenido!  
+                  <br />El equipo de <strong>WannaColive</strong>
+                </p>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td
+                style="
+                  background-color: #f4f4f7;
+                  padding: 15px;
+                  text-align: center;
+                  font-size: 12px;
+                  color: #777777;
+                "
+              >
+                © 2025 WannaColive. Todos los derechos reservados.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

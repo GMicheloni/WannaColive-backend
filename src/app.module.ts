@@ -18,6 +18,8 @@ import { CitiesModule } from './cities/cities.module';
 import { HobbiesModule } from './hobbies/hobbies.module';
 import { ContratosModule } from './contratos/contratos.module';
 import { NewsModule } from './news/news.module';
+import { EmailModule } from './email/email.module';
+
 
 @Module({
   imports: [
@@ -45,6 +47,7 @@ import { NewsModule } from './news/news.module';
     HobbiesModule,
     ContratosModule,
     NewsModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [AppService],
