@@ -135,7 +135,7 @@ export class NewsService {
     try {
       const allNews = await this.newsRepository.find({
         relations: ['casas', 'usuarioDestino'],
-        order: { creadoEn: 'DESC' },
+        order: { creadoEn: 'DESC' }, select: { id: true, titulo: true, tipodecomunicado: true, descripcion: true, destinatario: true, creadoEn: true, actualizadoEn: true, casas: { id: true, nombre: true }, usuarioDestino: { id: true} }
       });
 
       const filteredNews = allNews.filter((news) => {
@@ -183,7 +183,12 @@ export class NewsService {
         return false;
       });
 
-      return filteredNews;
+      // Mapear para devolver solo id, titulo y tipodecomunicado
+      return filteredNews.map((news) => ({
+        id: news.id,
+        titulo: news.titulo,
+        tipodecomunicado: news.tipodecomunicado,
+      }));
     } catch (error) {
       this.logger.error(
         `Error en getForMe: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -191,6 +196,33 @@ export class NewsService {
       throw new InternalServerErrorException(
         'Error al obtener las noticias para el usuario',
       );
+    }
+  }
+
+  async findOne(id: string) {
+    try {
+      const news = await this.newsRepository.findOne({
+        where: { id },
+        select: ['titulo', 'descripcion', 'tipodecomunicado'],
+      });
+
+      if (!news) {
+        throw new NotFoundException('Noticia no encontrada');
+      }
+
+      return {
+        titulo: news.titulo,
+        descripcion: news.descripcion,
+        tipodecomunicado: news.tipodecomunicado,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      this.logger.error(
+        `Error en findOne: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      throw new InternalServerErrorException('Error al obtener la noticia');
     }
   }
   

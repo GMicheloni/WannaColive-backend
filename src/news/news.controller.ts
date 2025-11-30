@@ -44,5 +44,12 @@ export class NewsController {
     const userId = req.user.id;
     return this.newsService.getForMe(userRole, casaNombre, userId);
   }
+
+  @Get(':id')
+  @Roles(Role.USER, Role.ADMIN, Role.MODERATOR)
+  @UseGuards(AuthGuard, RolesGuard)
+  findOne(@Param('id') id: string) {
+    return this.newsService.findOne(id);
+  }
 }
 
