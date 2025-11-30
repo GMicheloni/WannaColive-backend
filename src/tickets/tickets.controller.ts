@@ -78,4 +78,18 @@ export class TicketsController {
     const { comentarioAdmin } = body;
     return this.ticketsService.closeTicket(id, comentarioAdmin);
   }
+
+  @Get('/:id/comentarios')
+  @Roles(Role.USER, Role.ADMIN, Role.MODERATOR)
+  @UseGuards(AuthGuard, RolesGuard)
+  getComentarios(@Param('id') id: string, @Req() req) {
+    if (!id) {
+      throw new Error('Ticket ID is required');
+    }
+    if (!req || !req.user || !req.user.id) {
+      throw new Error('User not authenticated');
+    }
+    const userId = req.user.id;
+    return this.ticketsService.getComentariosByTicketId(id, userId);
+  }
 }
