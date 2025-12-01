@@ -22,9 +22,11 @@ const config = {
   dropSchema: false,
   
   // ⚠️ solo en desarrollo - elimina y recrea el esquema cada vez que se inicia la app
-  ssl: {
-    rejectUnauthorized: true, // importante para Render
-  },
+  ssl:
+  process.env.DB_SSL === 'true'
+    ? { rejectUnauthorized: false }
+    : false,
+
 };
 
 export default registerAs('typeorm', () => config);
