@@ -81,9 +81,6 @@ export class CountriesService implements OnModuleInit {
       if (paisesNuevos.length > 0) {
         this.logger.log(`💾 Insertando ${paisesNuevos.length} países en bulk...`);
         
-        // Desactivar triggers temporalmente (esto mejora significativamente el rendimiento)
-        await queryRunner.manager.query('ALTER TABLE paises DISABLE TRIGGER ALL');
-        
         // Usar SQL raw con INSERT múltiple (más rápido)
         const batchSize = 1000;
         for (let i = 0; i < paisesNuevos.length; i += batchSize) {
@@ -96,9 +93,6 @@ export class CountriesService implements OnModuleInit {
             `INSERT INTO paises (nombre) VALUES ${values}`,
           );
         }
-        
-        // Reactivar triggers
-        await queryRunner.manager.query('ALTER TABLE paises ENABLE TRIGGER ALL');
         
         insertedPaises = paisesNuevos.length;
         
@@ -174,9 +168,6 @@ export class CountriesService implements OnModuleInit {
       if (ciudadesNuevas.length > 0) {
         this.logger.log(`💾 Insertando ${ciudadesNuevas.length} ciudades en bulk...`);
         
-        // Desactivar triggers temporalmente (esto mejora significativamente el rendimiento)
-        await queryRunner.manager.query('ALTER TABLE ciudades DISABLE TRIGGER ALL');
-        
         // Usar SQL raw directo con INSERT múltiple (mucho más rápido)
         const batchSize = 2000;
         const escapedFkColumn = `"${fkColumnName}"`;
@@ -191,9 +182,6 @@ export class CountriesService implements OnModuleInit {
             `INSERT INTO ciudades (nombre, ${escapedFkColumn}) VALUES ${valuesDirect}`,
           );
         }
-        
-        // Reactivar triggers
-        await queryRunner.manager.query('ALTER TABLE ciudades ENABLE TRIGGER ALL');
         
         insertedCiudades = ciudadesNuevas.length;
       }
